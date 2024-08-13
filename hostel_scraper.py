@@ -17,13 +17,8 @@ from bs4 import BeautifulSoup
 
 chrome_options = Options()
 
-
-# testing to see if data can be accessed in url above
-# for info in soup.find("div", class_="properties-count"):
-# print(info.text)
-
 options = webdriver.ChromeOptions()
-# options.add_argument("--headless")
+options.add_argument("--headless")
 options.add_argument("start-maximized")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option("detach", True)
@@ -31,27 +26,22 @@ options.add_experimental_option("useAutomationExtension", False)
 chrome_driver_path = '/usr/local/bin/chromedriver'
 service = Service(executable_path=chrome_driver_path)
 
-
 browser = webdriver.Chrome(
     options=options,
     service=service,
 )
-
 
 with open("continent_dict.json", encoding="UTF-8") as country_dict:
     country_dict = country_dict.read()
 
 country_dict = json.loads(country_dict)
 
-
 # user enters country name
 def user_country():
     country_choice = input("\nEnter country: ")
     return country_choice
 
-
 country = user_country()
-
 
 # country variable used to get continent name from dictionary to autofill into country url
 def get_continent():
@@ -63,9 +53,8 @@ def get_continent():
             # country is the user's choice
             if country == element:
                 continent_dict = [k for k, v in country_dict.items() if v == item][0]
-                print(f"\nContinent of country: {continent_dict}\n")
+                # print(f"\nContinent of country: {continent_dict}\n")
                 return continent_dict
-
 
 continent = get_continent()
 
@@ -93,14 +82,10 @@ def get_cities():
         city_list.append(title)
     print(f"\nList of cities: {city_list}\n")
     # print(*city_list, sep="\n")
-
     # time.sleep(5)
-
     # browser.quit()
 
-
 get_cities()
-
 
 def dict_cities():
     digit = [num + 1 for num in range(len(city_list))]
@@ -109,12 +94,9 @@ def dict_cities():
     joint_list = zip(digit, city_list)
     city_dict = dict(joint_list)
     print(f"\nDictionary of city choices: {city_dict}\n")
-
     return city_dict
 
-
 dictionary_cities = dict_cities()
-
 
 def list_cities():
     # create list of numbers for each city in city_list
@@ -127,11 +109,9 @@ def list_cities():
     print(f"\nNumbered city list: {number_city_list}\n")
     return number_city_list
 
-
 city_choices = list_cities()
 
 # print(*city_choices, sep="\n")
-
 
 def choose_city():
     print("\nCHOOSE A CITY:\n")
@@ -140,18 +120,16 @@ def choose_city():
     city_choice = int(input("\nEnter city by digit: "))
 
     if city_choice in dictionary_cities:
-        print("\nYAAAAASSS\n")
+        print("\nYes\n")
         city_value = dictionary_cities[city_choice]
         return city_value
 
     # user enters number
     # open web page based on city choice
 
-
 city = choose_city()
 
-
-# next def should scan country page for pagination of hostel lists
+# next function should scan country page for pagination of hostel lists
 def city_page():
     url = f"https://www.hostelworld.com/st/hostels/{continent}/{country}/{city}/"
     # replaces any white space with %20
@@ -159,7 +137,6 @@ def city_page():
     print(url)
     html = urlopen(url)
     # page = requests.get(url, timeout=10)
-    # soup = BeautifulSoup(page.content, "html.parser")
 
     soup = BeautifulSoup(html, "html.parser")
     soup.prettify()
@@ -205,7 +182,7 @@ def city_page():
     else:
         print("\nThis city has only one page worth of hostels.\n")
         url_list = [url]
-        print(f"Single url link: {url}")
+        print(f"Single url link: {url_list}")
         return url_list
 
 
@@ -213,21 +190,20 @@ paginated_list = city_page()
 
 links_list = []
 
+def links_city_hostels():
 
-def links_cityhostels():
     for index, dummy in enumerate(paginated_list):
         page = requests.get(paginated_list[index], timeout=10)
         soup = BeautifulSoup(page.content, "html.parser")
         soup.prettify()
 
-        link_elements = soup.find_all("div", class_="gallery")
+        link_elements = soup.find_all("div", class_="property-listing-cards")
         # scrape each page for links for each hostel listed
         for link in link_elements:
             results = link.find_all("a")
             for result in results:
                 link_url = result["href"]
                 links_list.append(link_url)
-        # print(f"\nList of links: {links_list}\n")
         browser.quit()
 
     url_count = len(links_list)
@@ -236,7 +212,7 @@ def links_cityhostels():
     return url_count
 
 
-hostels_links = links_cityhostels()
+hostels_links = links_city_hostels()
 
 
 def city_hostel_dict():
@@ -249,19 +225,19 @@ def city_hostel_dict():
         soup = BeautifulSoup(page.content, "html.parser")
         soup.prettify()
 
-        hostel_name = soup.find("h1")
-        hostel_name = hostel_name.text.strip()
+        hostel_name = soup.find("h1").text.strip()
         name_list.append(hostel_name)
 
-        breakdown_scores = soup.find_all("div", class_="rating-score")
+        parent_divs = soup.find_all('div', class_='rating-label-score-wrapper')
 
         specific_scores = [
-            breakdown_score.text.strip() for breakdown_score in breakdown_scores
+            parent_div.find('div', class_='rating-score').text.strip() for
+            parent_div in parent_divs
         ]
+
         composite_hostel_scores.append(specific_scores)
 
         lists_to_join = zip(name_list, composite_hostel_scores)
-        # print(f"\nLists to join: {lists_to_join}\n")
         specific_ratings = list(lists_to_join)
         # print(f"\nSpecific ratings: {specific_ratings}\n")
         ratings_dict = dict(specific_ratings)
@@ -286,7 +262,6 @@ def city_hostel_dict():
     print(f"\nComplete Dictionary: {ratings_dict}\n")
     print(f"Unrated hostels: {no_rating_string}")
     return ratings_dict
-
 
 city_ratings_dict = city_hostel_dict()
 
