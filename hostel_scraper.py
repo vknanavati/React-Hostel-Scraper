@@ -23,7 +23,7 @@ chrome_options = Options()
 # print(info.text)
 
 options = webdriver.ChromeOptions()
-options.add_argument("--headless")
+# options.add_argument("--headless")
 options.add_argument("start-maximized")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option("detach", True)
@@ -71,7 +71,6 @@ continent = get_continent()
 
 city_list = []
 
-
 # accesses main hostel page for user country using continent, country variables
 def get_cities():
     # generates list of cities with hostels in that country
@@ -84,40 +83,14 @@ def get_cities():
     browser.get(url)
     # time.sleep(4)
 
-    select_housing = Select(
-        WebDriverWait(browser, 10).until(
-            EC.element_to_be_clickable(
-                (
-                    By.XPATH,
-                    "//select[@title='Find']",
-                )
-            )
-        )
-    )
-    select_housing.select_by_index(0)
-
-    select_location = Select(
-        WebDriverWait(browser, 10).until(
-            EC.element_to_be_clickable(
-                (
-                    By.XPATH,
-                    "//select[@title='in']",
-                )
-            )
-        )
-    )
-
-    select_location.select_by_index(1)
-    time.sleep(10)
-
     results = browser.find_elements(
         By.XPATH,
-        "//div[@class='selection-container'][3]/label/select/option[position()>1]",
+        "//div[@class='average-city-prices-list']/a"
     )
 
     for result in results:
-        city_place = result.text
-        city_list.append(city_place)
+        title = result.get_attribute("title")
+        city_list.append(title)
     print(f"\nList of cities: {city_list}\n")
     # print(*city_list, sep="\n")
 
