@@ -6,13 +6,10 @@ from random import randint
 from time import sleep
 from urllib.request import urlopen
 import requests
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 
 chrome_options = Options()
@@ -23,8 +20,8 @@ options.add_argument("start-maximized")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option("detach", True)
 options.add_experimental_option("useAutomationExtension", False)
-chrome_driver_path = '/usr/local/bin/chromedriver'
-service = Service(executable_path=chrome_driver_path)
+CHROME_DRIVER_PATH = '/usr/local/bin/chromedriver'
+service = Service(executable_path=CHROME_DRIVER_PATH)
 
 browser = webdriver.Chrome(
     options=options,
@@ -36,29 +33,34 @@ with open("continent_dict.json", encoding="UTF-8") as country_dict:
 
 country_dict = json.loads(country_dict)
 
+
 # user enters country name
 def user_country():
     country_choice = input("\nEnter country: ")
     return country_choice
 
+
 country = user_country()
 
-# country variable used to get continent name from dictionary to autofill into country url
+
+# country variable used to get continent name from dictionary to autofill into country url # noqa
 def get_continent():
     # item = value of k:v
     for item in country_dict.values():
         print(f"\nCountries in continent: {item}\n")
-        # element represents the country in the list of countries from dictionary that country variable will be compared against
+        # element represents the country in the list of countries from dictionary that country variable will be compared against # noqa
         for element in item:
             # country is the user's choice
             if country == element:
-                continent_dict = [k for k, v in country_dict.items() if v == item][0]
+                continent_dict = [k for k, v in country_dict.items() if v == item][0] # noqa
                 # print(f"\nContinent of country: {continent_dict}\n")
                 return continent_dict
+
 
 continent = get_continent()
 
 city_list = []
+
 
 # accesses main hostel page for user country using continent, country variables
 def get_cities():
@@ -85,7 +87,9 @@ def get_cities():
     # time.sleep(5)
     # browser.quit()
 
+
 get_cities()
+
 
 def dict_cities():
     digit = [num + 1 for num in range(len(city_list))]
@@ -96,7 +100,9 @@ def dict_cities():
     print(f"\nDictionary of city choices: {city_dict}\n")
     return city_dict
 
+
 dictionary_cities = dict_cities()
+
 
 def list_cities():
     # create list of numbers for each city in city_list
@@ -105,13 +111,15 @@ def list_cities():
     # add periods to each number
     number_list = [f"{num}. " for num in number_list]
 
-    number_city_list = [num + city for num, city in zip(number_list, city_list)]
+    number_city_list = [num + city for num, city in zip(number_list, city_list)] # noqa
     print(f"\nNumbered city list: {number_city_list}\n")
     return number_city_list
+
 
 city_choices = list_cities()
 
 # print(*city_choices, sep="\n")
+
 
 def choose_city():
     print("\nCHOOSE A CITY:\n")
@@ -127,11 +135,13 @@ def choose_city():
     # user enters number
     # open web page based on city choice
 
+
 city = choose_city()
+
 
 # next function should scan country page for pagination of hostel lists
 def city_page():
-    url = f"https://www.hostelworld.com/st/hostels/{continent}/{country}/{city}/"
+    url = f"https://www.hostelworld.com/st/hostels/{continent}/{country}/{city}/" # noqa
     # replaces any white space with %20
     url = url.replace(" ", "%20")
     print(url)
@@ -157,7 +167,7 @@ def city_page():
         raw_string = results.get_attribute("innerText").replace("\n", "")
         digit_string = re.sub("[^0-9]", "", raw_string)
         # digit_list = number of pages ex. London has 4 pages worth of hostels
-        #so digit_list = [1, 2, 3, 4]
+        # so digit_list = [1, 2, 3, 4]
         digit_list = [int(page) for page in digit_string]
 
         print("\nDetermined number of pages.\n")
@@ -165,13 +175,18 @@ def city_page():
 
         time.sleep(5)
 
-        # url_list initially creates template hostel link for each element in digit list
+        # url_list initially creates template hostel link for each element in digit list # noqa
 
         url_list = [url for count in enumerate(digit_list)]
 
         # print([url for count in range(list_len)])
         # page number syntax is added to [1:]
-        # url_list: ['https://www.hostelworld.com/st/hostels/europe/england/london/', 'https://www.hostelworld.com/st/hostels/europe/england/london/p/2/', 'https://www.hostelworld.com/st/hostels/europe/england/london/p/3/', 'https://www.hostelworld.com/st/hostels/europe/england/london/p/4/']
+        # url_list: [
+        #   'https://www.hostelworld.com/st/hostels/europe/england/london/',
+        #   'https://www.hostelworld.com/st/hostels/europe/england/london/p/2/',
+        #   'https://www.hostelworld.com/st/hostels/europe/england/london/p/3/',
+        #   'https://www.hostelworld.com/st/hostels/europe/england/london/p/4/'
+        # ]
         i = 1
         for index, dummy in enumerate(url_list):
             i = i + 1
@@ -189,6 +204,7 @@ def city_page():
 paginated_list = city_page()
 
 links_list = []
+
 
 def links_city_hostels():
 
@@ -252,9 +268,9 @@ def city_hostel_dict():
 
         sleep(randint(2, 10))
 
-    no_ratings_dict = {key: value for (key, value) in ratings_dict.items() if not value}
+    no_ratings_dict = {key: value for (key, value) in ratings_dict.items() if not value} # noqa
 
-    ratings_dict = {key: value for (key, value) in ratings_dict.items() if value}
+    ratings_dict = {key: value for (key, value) in ratings_dict.items() if value} # noqa
 
     no_rating_list = list(no_ratings_dict.keys())
     no_rating_string = ", ".join([str(elem) for elem in no_rating_list])
@@ -262,6 +278,7 @@ def city_hostel_dict():
     print(f"\nComplete Dictionary: {ratings_dict}\n")
     print(f"Unrated hostels: {no_rating_string}")
     return ratings_dict
+
 
 city_ratings_dict = city_hostel_dict()
 
