@@ -146,7 +146,7 @@ def city_page():
     url = url.replace(" ", "%20")
     print(url)
     html = urlopen(url)
-    # page = requests.get(url, timeout=10)
+    # page = requests.get(url, timeout=10)h
 
     soup = BeautifulSoup(html, "html.parser")
     soup.prettify()
